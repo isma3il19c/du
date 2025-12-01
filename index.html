@@ -24,7 +24,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@700&family=IBM+Plex+Sans+Arabic:wght@400;700&display=swap" rel="stylesheet">
 
-  <!-- ⚠️ nonce ثابت (مناسب للـ static) -->
+  <!-- CSP ثابت مناسب للـ static (Nonce ثابت) -->
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self';
     base-uri 'none';
@@ -48,7 +48,7 @@
       --gold:#d6b36a; --gold-2:#f3dca6; --gold-3:#f9e9be;
       --txt:#fbf8f2; --muted:#eadfcdcc;
 
-      /* Glass (لا ينطفئ على الموبايل) */
+      /* Glass ثابت على كل الأجهزة */
       --blur:20px;
       --glass-a: rgba(255,255,255,.14);
       --glass-b: rgba(255,255,255,.06);
@@ -61,7 +61,7 @@
       --e:360ms cubic-bezier(.22,.61,.36,1);
       --focus:#fff; --focus-bg:rgba(243,220,166,.35);
 
-      --icon-size: 52px;
+      --icon: 52px;
 
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -73,8 +73,7 @@
     html,body{height:100%}
     html{-webkit-text-size-adjust:100%}
     body{
-      margin:0;
-      color:var(--txt);
+      margin:0; color:var(--txt);
       font-family:"IBM Plex Sans Arabic","El Messiri",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
       background:
         radial-gradient(1100px 800px at 70% -10%, #6a1431 0%, transparent 60%),
@@ -159,7 +158,7 @@
       pointer-events:none;
     }
 
-    /* ===== NAV (مُصلّح للموبايل) ===== */
+    /* ===== NAV (مُصلّح للموبايل 100%) ===== */
     .nav{
       position:sticky;
       top:calc(var(--safe-top) + 10px);
@@ -176,7 +175,7 @@
     }
     .brand{
       font-family:"El Messiri","IBM Plex Sans Arabic";
-      font-weight:800;
+      font-weight:900;
       letter-spacing:.15px;
       font-size:18px;
       background:linear-gradient(180deg, var(--gold-2), var(--gold));
@@ -244,7 +243,6 @@
       box-shadow:0 8px 18px rgba(214,179,106,.30);
     }
 
-    /* ✅ هذا هو الإصلاح الحقيقي: Grid ثابت للموبايل */
     .nav-cta{
       height:44px;
       display:flex;
@@ -255,6 +253,7 @@
     }
 
     @media (max-width: 560px){
+      :root{ --blur:16px; }
       .nav{ width:min(1000px,96vw); }
       .nav .wrap{
         display:grid;
@@ -277,11 +276,12 @@
       .nav-cta{
         width:100%;
         white-space:normal;
+        padding-inline:10px;
       }
     }
     @media (max-width: 380px){
       .brand{ font-size:14px; }
-      .nav-cta{ font-size:14px; padding:0 10px; }
+      .nav-cta{ font-size:14px; }
     }
 
     /* ===== HERO ===== */
@@ -397,10 +397,20 @@
       grid-template-columns:repeat(12,1fr);
       margin-block:clamp(22px,5vw,42px);
     }
-    .card{ grid-column:span 12; padding:16px; transition:transform var(--e), box-shadow var(--e) }
+    .card{
+      grid-column:span 12;
+      padding:16px;
+      transition:transform var(--e), box-shadow var(--e);
+    }
     @media(min-width:720px){ .card{ grid-column:span 4 } }
 
-    .card-link{ display:flex; flex-direction:column; gap:12px; text-decoration:none; color:inherit }
+    .card-link{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      text-decoration:none;
+      color:inherit;
+    }
     .media{
       position:relative;
       width:100%;
@@ -412,7 +422,12 @@
       box-shadow:inset 0 0 0 1px rgba(255,255,255,.05);
       transform:translateZ(0);
     }
-    .media img{ width:100%; height:100%; object-fit:cover; display:block; filter:contrast(1.05) saturate(1.02); }
+    .media img{
+      width:100%; height:100%;
+      object-fit:cover;
+      display:block;
+      filter:contrast(1.05) saturate(1.02);
+    }
     .card h3{
       margin:0;
       font-weight:900;
@@ -422,18 +437,38 @@
       color:transparent;
     }
 
+    /* ✅ Badge + Shine يعمل على الهاتف بدون hover */
     .badge{
       position:absolute; top:10px; inset-inline-end:10px;
-      display:inline-flex; align-items:center; gap:8px;
+      display:inline-flex; align-items:center; justify-content:center;
       padding:10px 12px;
       border-radius:999px;
+
       user-select:none; pointer-events:none;
       color:#3c2a05;
       font-weight:950; font-size:14px;
+
       background:linear-gradient(180deg, var(--gold-2), var(--gold));
       border:1px solid rgba(255,255,255,.7);
       box-shadow:0 14px 30px rgba(214,179,106,.40), inset 0 0 0 1px rgba(255,255,255,.28);
+
+      overflow:hidden;
+      isolation:isolate;
+      transform:translateZ(0);
     }
+    .badge.gift::after{
+      content:"";
+      position:absolute;
+      inset:-45% -25% auto -25%;
+      height:240%;
+      transform:skewX(-25deg) translateX(-140%);
+      background:linear-gradient(90deg, transparent, rgba(255,255,255,.65), transparent);
+      filter:blur(6px);
+      opacity:.95;
+      will-change:transform;
+      animation: badgeShine 1.85s ease-in-out infinite;
+    }
+    @keyframes badgeShine{ to{ transform:skewX(-25deg) translateX(140%); } }
 
     .features{ display:grid; grid-template-columns:repeat(12,1fr); gap:16px }
     .feature{ grid-column:span 12; padding:18px }
@@ -478,14 +513,19 @@
       -webkit-background-clip:text; background-clip:text;
       color:transparent;
     }
-    .rights{ text-align:center; color:#f0eadf; opacity:.92; line-height:1.8; font-weight:750; }
+    .rights{
+      text-align:center;
+      color:#f0eadf;
+      opacity:.92;
+      line-height:1.8;
+      font-weight:750;
+    }
 
     .socials{ display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:14px; }
     .icon{
-      width:var(--icon-size); height:var(--icon-size);
+      width:var(--icon); height:var(--icon);
       border-radius:16px;
       display:grid; place-items:center;
-      position:relative; isolation:isolate;
       border:1px solid rgba(255,255,255,.18);
       background:linear-gradient(145deg, rgba(255,255,255,.12), rgba(255,255,255,.04));
       box-shadow:0 8px 24px rgba(0,0,0,.25);
@@ -494,10 +534,7 @@
       transform:translateZ(0);
     }
     @supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
-      .icon{
-        -webkit-backdrop-filter: blur(16px) saturate(160%);
-        backdrop-filter: blur(16px) saturate(160%);
-      }
+      .icon{ -webkit-backdrop-filter: blur(16px) saturate(160%); backdrop-filter: blur(16px) saturate(160%); }
     }
     .icon svg{ width:52%; height:52%; display:block }
     .icon:hover{ transform:translateY(-4px); border-color:rgba(243,220,166,.55); box-shadow:0 14px 34px rgba(214,179,106,.26); }
@@ -542,6 +579,7 @@
     @media (prefers-reduced-motion: reduce){
       *{ scroll-behavior:auto !important }
       .glass::before{ animation:none !important }
+      .badge.gift::after{ animation:none !important }
     }
 
     .sr-only{
@@ -557,7 +595,6 @@
   <a href="#main" class="sr-only" data-i18n="skip">تجاوز إلى المحتوى</a>
   <div class="progress" id="progress" aria-hidden="true"></div>
 
-  <!-- ✅ NAV منظم على الموبايل -->
   <nav class="nav" aria-label="شريط التنقل الرئيسي">
     <div class="glass wrap">
       <span class="brand" data-i18n="brand">التصميم فنّ، والدقة لغة</span>
@@ -605,7 +642,7 @@
            rel="noopener noreferrer sponsored nofollow" aria-label="التقديم على البطاقة">
           <div class="media">
             <img src="./imeg/asd.svg" alt="Mastercard Gold Card" width="1600" height="1000" loading="lazy" decoding="async">
-            <span class="badge" aria-label="هدية نقدية 100€+">100€+</span>
+            <span class="badge gift" aria-label="هدية نقدية 100€+">100€+</span>
           </div>
           <div><h3>Mastercard Gold Card</h3></div>
         </a>
@@ -616,7 +653,7 @@
            target="_blank" rel="noopener noreferrer sponsored nofollow" aria-label="التقديم على البطاقة">
           <div class="media">
             <img src="./imeg/ayx.svg" alt="TF Credit" width="1600" height="1000" loading="lazy" decoding="async">
-            <span class="badge" aria-label="هدية نقدية 100€+">100€+</span>
+            <span class="badge gift" aria-label="هدية نقدية 100€+">100€+</span>
           </div>
           <div><h3>TF Credit Card</h3></div>
         </a>
@@ -627,7 +664,7 @@
            target="_blank" rel="noopener noreferrer sponsored nofollow" aria-label="التقديم على البطاقة">
           <div class="media">
             <img src="./imeg/asw.jpg" alt="Revolut Debit" width="1600" height="1000" loading="lazy" decoding="async">
-            <span class="badge" aria-label="هدية نقدية 100€+">100€+</span>
+            <span class="badge gift" aria-label="هدية نقدية 100€+">100€+</span>
           </div>
           <div><h3>Revolut Debit Card</h3></div>
         </a>
@@ -787,7 +824,6 @@
 
       function applyLang(key){
         const dict = I18N[key] || I18N.ar;
-
         docEl.setAttribute('lang', dict.lang);
         docEl.setAttribute('dir', dict.dir);
 
@@ -903,6 +939,12 @@
           current = (current === 'ar') ? 'de' : 'ar';
           applyLang(current);
         });
+      }
+
+      // ===== Year (fallback) =====
+      const rights = document.getElementById('rightsText');
+      if (rights && !rights.textContent.trim()) {
+        rights.textContent = `© ${new Date().getFullYear()} Ismail . جميع الحقوق محفوظة.`;
       }
     })();
   </script>
